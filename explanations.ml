@@ -3,6 +3,8 @@ Author: Joanne Dumont
 Based on Arthur Gontier's work
 (**)
 
+(*TODO: add print statements*)
+
 (*I - Prerequisites*)
 
 (*I.1 - Definitions*)
@@ -389,7 +391,7 @@ let table  = [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, AC); Reifi
               Decomp (2, rule3, [Decomp_devent (true , (B 1), id, oni); Reified_devent (true, (B 2), id, imap [i_out])]);
               Decomp (4, rule4, [Decomp_devent (true , (B 2), id, onr)])]
 
-(*IV.2 Global events*)
+(*IV.2 - Global events*)
 let xbc = Global_event (true, X, [Ind (I 1, []); Ind (T 1, [])], BC)
 let xac = Global_event (true, X, [Ind (I 1, []); Ind (T 1, [])], AC)
 let nbc = Global_event (true, N, [Ind (P 1, [])], BC)
@@ -398,3 +400,116 @@ let i   = Global_event (true, I, [Ind (I 1, [])], AC)
 let v   = Global_event (true, V, [Ind (T 1, [])], AC)
 let ngbc= Global_event (true, O, [Ind (T 1, []); Ind (P 1, [])], BC)
 let x3ac= Global_event (true, X, [Ind (I 1, []); Ind (T 1, []);Ind (R 1, [])], AC)
+
+(*V - Output*)
+
+(*V.1 - Print explanation as a string*) 
+let rec printprim n = match n with 1 -> "" | _ ->"'"^printprim (n-1)
+let printind_name_int a = match a with 1 -> "" | 2 -> "'" | 3 -> "''" | _ -> "_{"^string_of_int a^"}"
+let printind_name i = match i with I a -> "i"^printind_name_int a | T a -> "t"^printind_name_int a | P a -> "p"^printind_name_int a | R a -> "r"^printind_name_int a
+let printind_set_int a = match a with 1 -> "\\llbracket1,n\\rrbracket" | 2 -> "\\llbracket1,m\\rrbracket" | 3 -> "\\llbracket1,n\\rrbracket" | _ -> "D_{"^string_of_int a ^"}"
+let printind_set s = match s with D a -> printind_set_int a | D2 _ -> "setfils" 
+let printind_const_int a = match a with 1 -> "" | _ -> "_{"^string_of_int a^"}"
+let printind_const c = match c with C a -> "d"^printind_const_int a
+let printind_symbols s = match s with PLUS-> "+"|MINUS->"-"|IN->"∈"|NEQ->"≠"|LEQ->"<="|GEQ->">="|EQ->"=" 
+let printind_modifs op= match op with 
+  | Set (ind1,sym1,set1) ->printind_name ind1^printind_symbols sym1^printind_set set1 
+  | Rel (ind1,sym1,ind2) ->printind_name ind1^printind_symbols sym1^printind_name ind2 
+  | Addint (ind1,ind2,sym1,int) ->printind_name ind1^"="^printind_name ind2^printind_symbols sym1^string_of_int int 
+  | Addcst (ind1,ind2,sym1,cst1,ind3) ->printind_name ind1^"="^printind_name ind2^printind_symbols sym1^printind_const cst1^printind_name ind3 
+  | EXFORALL ind1 ->"∀"^printind_name ind1 
+  | EXEXISTS ind1 ->"∃"^printind_name ind1 
+let rec printiopl il = match il with []->""|i::tl->printind_modifs i^","^printiopl tl 
+let printi i = printind_name (ind_name i)^" "^printiopl (ind_modifs_list i) 
+let printcons v = match cons v with AC -> if sign v then "=" else "≠" | BC -> if sign v then "≥" else "<" 
+let rec isppp il = match il with [] -> [] | i::tl -> match i with Ind (P _,_) -> [i] | _ -> isppp tl
+let rec isttt il = match il with [] -> [] | i::tl -> match i with Ind (T _,_) -> [i] | _ -> isttt tl
+let rec printind_name_list il = match il with []->""|i::tl->printind_name (ind_name i) 
+let rec printiopl_list il = match il with []->""|i::tl->printiopl (ind_modifs_list i)
+let printglobal_event e = 
+  let right = hd (match isppp (index_list e) with [] -> isttt (index_list e) | _ -> isppp (index_list e)) in
+  let left = subi right (index_list e) in
+  printind_name_list left^printcons e^printind_name (ind_name right)^printiopl_list (index_list e)
+let printevent_var v = match name v with 
+  | X -> "   X"^printglobal_event v
+  | B i -> "ERROR B " 
+  | T -> "ERROR T " 
+  | I -> "   I"^printcons v^printi (hd (index_list v)) 
+  | V -> "   V"^printcons v^printi (hd (index_list v)) 
+  | N -> "   N"^printcons v^printi (hd (index_list v)) 
+  | O -> "   X"^printglobal_event v
+let rec printe el = match el with []->"" | e::tl -> match e with  
+  |F|IM|FE|R -> "? "^printe tl 
+  | T -> printe tl 
+  | Var v -> printevent_var v^printe tl
+
+(*V.2 - Print explanation in LaTex*) 
+let printsymtex s = match s with PLUS-> "+"|MINUS->"-"|IN->" \\in "|NEQ->" \\neq "|LEQ->" \\leq "|GEQ->" \\geq "|EQ->"=" 
+let printioptex op= match op with 
+  | Set (ind1,sym1,set1) ->printind_name ind1^printsymtex sym1^printind_set set1 
+  | Rel (ind1,sym1,ind2) ->printind_name ind1^printsymtex sym1^printind_name ind2 
+  | Addint (ind1,ind2,sym1,int) ->printind_name ind1^"="^printind_name ind2^printsymtex sym1^string_of_int int 
+  | Addcst (ind1,ind2,sym1,cst1,ind3) ->printind_name ind1^"="^printind_name ind2^printsymtex sym1^printind_const cst1^"_{"^printind_name ind3^"}" 
+  | EXFORALL ind1 ->"\\forall "^printind_name ind1 
+  | EXEXISTS ind1 ->"\\exists "^printind_name ind1 
+let rec printiopltex il = match il with []->""|i::[]->printioptex i|i::tl->printioptex i^",~"^printiopltex tl 
+let printitex i = printind_name (ind_name i)^(if ind_modifs_list i!=[]then ",~" else "")^printiopltex (ind_modifs_list i) 
+let printconstex v = match cons v with AC -> if sign v then "=" else " \\neq " | BC -> if sign v then " \\geq " else "<"
+let rec printiopl_listtex il = match il with []->""|i::tl->(if ind_modifs_list i!=[]then ",~" else "")^printiopltex (ind_modifs_list i)^printiopl_listtex tl
+let printglobal_eventtex e = 
+  let right = hd (isppp (index_list e)@isttt (index_list e)) in
+  let left = subi right (index_list e) in
+  "_{"^printind_name_list left^"}"^printconstex e^printind_name (ind_name right)^""^printiopl_listtex (index_list e)
+let printvartex v = match name v with 
+  | X -> "X"^printglobal_eventtex v
+  | B i -> "ERROR B " 
+  | T -> "ERROR T " 
+  | I -> "I"^printconstex v^printitex (hd (index_list v)) 
+  | V -> "V"^printconstex v^printitex (hd (index_list v)) 
+  | N -> "N"^printconstex v^printitex (hd (index_list v)) 
+  | O -> "O"^printglobal_eventtex v 
+let rec printetex el = match el with []->"" | e::tl -> match e with  
+  |F|IM|FE|R -> "? "^printetex tl 
+  | T -> printetex tl
+  | Var v ->printvartex v^(match tl with []->""|v2::_->match v2 with Var _ -> "~~~~"|_->"")^printetex tl
+
+(*VI - Explanations*)
+
+open Printf 
+let rec printfraqtex el x fic = match el with  
+  | [] -> () 
+  | e::tl -> fprintf fic "%s" ("$$\\frac{"^e^"}{"^printvartex x^"}$$ ");printfraqtex tl x fic 
+ 
+let explain e dec = 
+  let fic = open_out "exp.tex" in 
+  let cl = ctrs e dec in  
+  let _ = printfraqtex (map (fun l-> printetex l) (removeimp (an (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (vars e (decomp_event_list c))) cl)))))) e fic in
+  close_out fic 
+let rec explainallaux el dec fic =
+  match el with []->() | e::tl -> 
+    let cl = ctrs e dec in  
+    let _ = printfraqtex (map (fun l-> printetex l) (removeimp (an (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (vars e (decomp_event_list c))) cl)))))) e fic in
+    let e = n e in
+    let _ = printfraqtex (map (fun l-> printetex l) (removeimp (an (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (vars e (decomp_event_list c))) cl)))))) e fic in
+    explainallaux tl dec fic
+let explainall el dec str = 
+  let fic = open_out str in 
+  let _ = explainallaux el dec fic in
+  close_out fic 
+
+let _ = explain xbc incr
+let _ = explainall [xbc] alleq "cata/allequal.tex"
+let _ = explainall [xac] alldiff "cata/alldifferent.tex"
+let _ = explainall [xbc] cumul "cata/cumulative.tex"
+let _ = explainall [xac;ngbc] gccn "cata/gcc.tex"
+let _ = explainall [xbc] decr "cata/decreasing.tex"
+let _ = explainall [xbc] incr "cata/increasing.tex"
+let _ = explainall [xac;i;v] elem "cata/element.tex"
+let _ = explainall [xac;nac] nvalues "cata/nvalues.tex"
+let _ = explainall [xac;nbc] atleastnvalues "cata/atleastnvalues.tex"
+let _ = explainall [xac;nbc] atmostnvalues "cata/atmostnvalues.tex"
+let _ = explainall [xac] among "cata/among.tex"
+let _ = explainall [xac] regular "cata/regular.tex"
+let _ = explainall [xac] roots "cata/roots.tex"
+let _ = explainall [xac] range "cata/range.tex"
+let _ = explainall [x3ac] table "cata/table.tex"
