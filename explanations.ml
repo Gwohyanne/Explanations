@@ -1,7 +1,5 @@
-(**)
-Author: Joanne Dumont
-Based on Arthur Gontier's work
-(**)
+(*Author: Joanne Dumont*)
+(*Based on Arthur Gontier's work*)
 
 (*TODO: add print statements*)
 
@@ -37,7 +35,7 @@ type tree = | Lit of leaf
 (*Constraint with id, explanation rule and devent list*) 
 type decomp_ctr = Decomp of int*(event->decomp_event->decomp_ctr->decomp_ctr list->event list->tree)*decomp_event list
 
-(*I.2 - To use events*)
+(*I.2 - Useful functions to use events, constraints and lists*)
 let sign e = match e with Global_event (b,_,_,_) | Decomp_event (b,_,_) -> b
 let dsign e = match e with Global_devent (b,_,_,_,_) | Decomp_devent (b,_,_,_) | Reified_devent (b,_,_,_) -> b
 let name e = match e with Global_event (_,n,_,_) | Decomp_event (_,n,_) -> n
@@ -51,6 +49,13 @@ let dcons e = match e with
     |_ -> failwith "inner decomp events have no consistancy"
 let index_update e = match e with Global_devent (_,_,f,_,_) | Decomp_devent (_,_,f,_) | Reified_devent (_,_,f,_) -> f
 let index_propagate e = match e with Global_devent (_,_,_,f,_) | Decomp_devent (_,_,_,f) | Reified_devent (_,_,_,f) -> f
+let ind_name i = match i with Ind (i,_) -> i
+let ind_modifs_list i = match i with Ind (_,l) -> l
+let decomp_ctr_rule c = match c with Decomp (_,r,_) -> r
+let decomp_ctr_id c = match c with Decomp (id,_,_) -> id
+let decomp_event_list c = match c with Decomp (_,_,l) -> l
+
+let prim i = match i with I a -> I (a+1) | T a -> T (a+1) | P a -> P (a+1) | R a -> R (a+1) 
 
 let id  x = x(*identity function*) 
 let n   e = match e with(*negation of event x*) 
@@ -75,8 +80,8 @@ let rec ctr_with_event e cl = (*removes constraints in which event e doesn't app
 let rec removes_event e el = (*removes event e from event list el*) 
   match el with
     | [] -> []
-    | c::tl -> if (dsign e = dsign c)&&(dname e = dname c) then remove_event e tl
-               else c::remove_event e tl
+    | c::tl -> if (dsign e = dsign c)&&(dname e = dname c) then removes_event e tl
+               else c::removes_event e tl
 
 let rec reified_devent del = (*catch a reified event in a list*)
   match del with
@@ -85,28 +90,18 @@ let rec reified_devent del = (*catch a reified event in a list*)
         | Reified_devent (_,_,_,_) -> de
         | _ -> reified_devent tl
 
-(*I.3 - To use indexes*)
-let ind_name i = match i with Ind (i,_) -> i
-let ind_modifs_list i = match i with Ind (_,l) -> l
-
-let prim i = match i with I a -> I (a+1) | T a -> T (a+1) | P a -> P (a+1) | R a -> R (a+1) 
-
 let rec removes_index i il = (*removes index i from index list il*)
   match il with
     | [] -> []
     | j::tl -> if  ind_name i = ind_name j then removes_index i tl
                else j::removes_index i tl 
 
-(*I.4 - To use constraints*)
-let decomp_ctr_rule c = match c with Decomp (_,r,_) -> r
-let decomp_ctr_id c = match c with Decomp (id,_,_) -> id
-let decomp_event_list c = match c with Decomp (_,_,l) -> l
-
 let rec removes_constraint c cl = (*removes constraint c from constraint list cl*)
-  match l with
+  match cl with
     | [] -> []
     | cc::tl -> if  decomp_ctr_id c = decomp_ctr_id cc then removes_constraint c tl
                else cc::removes_constraint c tl 
+
 let rec is_constraint c cl = (*checks if constraint c appears in constraint list cl *) 
   match cl with
     | [] -> false
@@ -217,7 +212,7 @@ let rec find e prec dec ch =
   let cl = ctr_with_event e dec in 
   let cl = removes_constraint prec cl in 
   if cl = [] then Lit IM else 
-  EXOR (e,flatten (map (fun c-> map (fun de -> (decomp_ctr_rule c) e de c dec (ch@[e])) (vars e (decomp_event_list c))) cl)) 
+  EXOR (e,flatten (map (fun c-> map (fun de -> (decomp_ctr_rule c) e de c dec (ch@[e])) (same_name e (decomp_event_list c))) cl)) 
  
 and exp_re  re e de c dec ch =  (*explanation by refied event*) 
   if dname re  = T then Lit T else EXAND (e,[find (i_prop e re de) c dec ch]) 
@@ -229,11 +224,11 @@ and exp_nel del e de c dec ch = (*explanation by negative event list*)
   map (fun dee-> find (n_i_prop e dee de) c dec ch) del 
 
 let rec removesame l = (*keeps one occurence of each element*)
-  match l with []->[]|v::tl->if inl v tl then removesame tl else [v]@(removesame tl) 
+  match l with []->[]|v::tl->if is_constraint v tl then removesame tl else [v]@(removesame tl) 
 let rec imp l = (*detect impossible literals*) 
   match l with []->false | c::tl -> match c with |F|IM|FE|R -> true | _ -> imp tl 
 let rec removeimp ll = (*removes explanation with impossible literals*) 
-  match ll with []->[]|l::tl->if imp l || inl l tl then removeimp tl else [removesame l]@(removeimp tl) 
+  match ll with []->[]|l::tl->if imp l || is_constraint l tl then removeimp tl else [removesame l]@(removeimp tl) 
  
 let concat l = (*concatenation of EXAND and EXOR into EXOR of EXAND*) 
   match l with []-> [] | l1::[]-> l1 | l1::tl -> fold_left (fun l1 l2 -> flatten (map (fun x -> map (fun y -> x@y) l1) l2)) l1 tl 
@@ -241,8 +236,8 @@ let concat l = (*concatenation of EXAND and EXOR into EXOR of EXAND*)
 let rec analysis a = (*analysis of the explanation tree, returns explanation list*) 
   match a with 
     | Lit x -> [[x]] 
-    | EXOR (_,l) -> flatten (map an l) 
-    | EXAND (_,l) -> concat (map an l)
+    | EXOR (_,l) -> flatten (map analysis l) 
+    | EXAND (_,l) -> concat (map analysis l)
 
 (*III.2 - Rules*)
 
@@ -253,8 +248,8 @@ let rule0 e de c dec ch = (*reified - input global event*)
 
 let rule1 e de c dec ch = (*reified*)
   let re = reified_devent (decomp_event_list c) in 
-  let x = hd (remove_event re (decomp_event_list c)) in 
-  if decomp_name re = name e 
+  let x = hd (removes_event re (decomp_event_list c)) in 
+  if dname re = name e 
   then if dsign de = sign e
     then EXAND (e,[Lit (Var (i_prop e x re))]) 
     else EXAND (e,[Lit (Var (n_i_prop e x re))]) 
@@ -276,7 +271,7 @@ and rule3 e de c dec ch = (*conjonction*)
     then exp_re re e de c dec ch 
     else match del with
       | dee::[] -> EXOR  (e,exp_nre re e de c dec ch::[find (apprim e dee de) c dec ch]) 
-      | _       -> EXAND (e,exp_nre re e de c dec ch::exp_el (subl de del) e de c dec ch) 
+      | _       -> EXAND (e,exp_nre re e de c dec ch::exp_el (removes_event de del) e de c dec ch) 
 
 and rule4 e de c dec ch = (*disjunction*) 
   let re = reified_devent (decomp_event_list c) in
@@ -293,7 +288,7 @@ and rule4 e de c dec ch = (*disjunction*)
     if sign e = dsign de
     then match del with
       | dee::[] -> EXOR  (e,exp_re re e de c dec ch::[find (napprim e dee de) c dec ch]) 
-      | _       -> EXAND (e,exp_re re e de c dec ch::exp_nel (remove_event de del) e de c dec ch) 
+      | _       -> EXAND (e,exp_re re e de c dec ch::exp_nel (removes_event de del) e de c dec ch) 
     else exp_nre re e de c dec ch 
 
 and rule5 e de c dec ch = (*Bool sum<=c*) 
@@ -428,7 +423,7 @@ let rec printind_name_list il = match il with []->""|i::tl->printind_name (ind_n
 let rec printiopl_list il = match il with []->""|i::tl->printiopl (ind_modifs_list i)
 let printglobal_event e = 
   let right = hd (match isppp (index_list e) with [] -> isttt (index_list e) | _ -> isppp (index_list e)) in
-  let left = subi right (index_list e) in
+  let left = removes_index right (index_list e) in
   printind_name_list left^printcons e^printind_name (ind_name right)^printiopl_list (index_list e)
 let printevent_var v = match name v with 
   | X -> "   X"^printglobal_event v
@@ -458,7 +453,7 @@ let printconstex v = match cons v with AC -> if sign v then "=" else " \\neq " |
 let rec printiopl_listtex il = match il with []->""|i::tl->(if ind_modifs_list i!=[]then ",~" else "")^printiopltex (ind_modifs_list i)^printiopl_listtex tl
 let printglobal_eventtex e = 
   let right = hd (isppp (index_list e)@isttt (index_list e)) in
-  let left = subi right (index_list e) in
+  let left = removes_index right (index_list e) in
   "_{"^printind_name_list left^"}"^printconstex e^printind_name (ind_name right)^""^printiopl_listtex (index_list e)
 let printvartex v = match name v with 
   | X -> "X"^printglobal_eventtex v
@@ -482,15 +477,15 @@ let rec printfraqtex el x fic = match el with
  
 let explain e dec = 
   let fic = open_out "exp.tex" in 
-  let cl = ctrs e dec in  
-  let _ = printfraqtex (map (fun l-> printetex l) (removeimp (an (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (vars e (decomp_event_list c))) cl)))))) e fic in
+  let cl = ctr_with_event e dec in  
+  let _ = printfraqtex (map (fun l-> printetex l) (removeimp (analysis (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (same_name e (decomp_event_list c))) cl)))))) e fic in
   close_out fic 
 let rec explainallaux el dec fic =
   match el with []->() | e::tl -> 
-    let cl = ctrs e dec in  
-    let _ = printfraqtex (map (fun l-> printetex l) (removeimp (an (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (vars e (decomp_event_list c))) cl)))))) e fic in
+    let cl = ctr_with_event e dec in  
+    let _ = printfraqtex (map (fun l-> printetex l) (removeimp (analysis (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (same_name e (decomp_event_list c))) cl)))))) e fic in
     let e = n e in
-    let _ = printfraqtex (map (fun l-> printetex l) (removeimp (an (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (vars e (decomp_event_list c))) cl)))))) e fic in
+    let _ = printfraqtex (map (fun l-> printetex l) (removeimp (analysis (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (same_name e (decomp_event_list c))) cl)))))) e fic in
     explainallaux tl dec fic
 let explainall el dec str = 
   let fic = open_out str in 
@@ -498,18 +493,18 @@ let explainall el dec str =
   close_out fic 
 
 let _ = explain xbc incr
-let _ = explainall [xbc] alleq "cata/allequal.tex"
-let _ = explainall [xac] alldiff "cata/alldifferent.tex"
-let _ = explainall [xbc] cumul "cata/cumulative.tex"
-let _ = explainall [xac;ngbc] gccn "cata/gcc.tex"
-let _ = explainall [xbc] decr "cata/decreasing.tex"
-let _ = explainall [xbc] incr "cata/increasing.tex"
-let _ = explainall [xac;i;v] elem "cata/element.tex"
-let _ = explainall [xac;nac] nvalues "cata/nvalues.tex"
-let _ = explainall [xac;nbc] atleastnvalues "cata/atleastnvalues.tex"
-let _ = explainall [xac;nbc] atmostnvalues "cata/atmostnvalues.tex"
-let _ = explainall [xac] among "cata/among.tex"
-let _ = explainall [xac] regular "cata/regular.tex"
-let _ = explainall [xac] roots "cata/roots.tex"
-let _ = explainall [xac] range "cata/range.tex"
-let _ = explainall [x3ac] table "cata/table.tex"
+let _ = explainall [xbc] alleq "resultats/allequal.tex"
+let _ = explainall [xac] alldiff "resultats/alldifferent.tex"
+let _ = explainall [xbc] cumul "resultats/cumulative.tex"
+let _ = explainall [xac;ngbc] gccn "resultats/gcc.tex"
+let _ = explainall [xbc] decr "resultats/decreasing.tex"
+let _ = explainall [xbc] incr "resultats/increasing.tex"
+let _ = explainall [xac;i;v] elem "resultats/element.tex"
+let _ = explainall [xac;nac] nvalues "resultats/nvalues.tex"
+let _ = explainall [xac;nbc] atleastnvalues "resultats/atleastnvalues.tex"
+let _ = explainall [xac;nbc] atmostnvalues "resultats/atmostnvalues.tex"
+let _ = explainall [xac] among "resultats/among.tex"
+let _ = explainall [xac] regular "resultats/regular.tex"
+let _ = explainall [xac] roots "resultats/roots.tex"
+let _ = explainall [xac] range "resultats/range.tex"
+let _ = explainall [x3ac] table "resultats/table.tex"
