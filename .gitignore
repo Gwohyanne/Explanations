@@ -3,3 +3,9 @@ exp.tex
 explanations
 explanations.cmi
 explanations.cmo
+explanations.aux
+explanations.fdb_latexmk
+explanations.fls
+explanations.log
+explanations.out
+explanations.synctex.gz
