@@ -42,17 +42,24 @@
 \newcommand{\far}{\forall\R}
 \newcommand{\fit}{\fai\fat}
 
+\pdfstringdefDisableCommands{%
+  \def\{{}%
+  \def\}{}%
+  \def\ldots{}%
+}
+
 \begin{document}
 
 \maketitle
 
-\section{\alldiff}
+\section{\texorpdfstring{\alldiff}{alldiff}}
 \begin{align*}
     X_i = t &\iff b_{it}&\fai\fat\\
     \sum_{\I} b_{it}&\leq 1&\fat\\
 \end{align*}
 \import{./}{resultats/alldifferent.tex}
-\section{\alleq}
+
+\section{\texorpdfstring{\alleq}{alleq}}
 \begin{align*}
     X_i\geq t & \iff b_{it}&\fit\\
     \bigwedge_{\I} b_{it} &\iff b1_t &\fat\\
@@ -60,7 +67,8 @@
     (b1_t &\vee b2_t) &\fat
 \end{align*}
 \import{./}{resultats/allequal.tex}
-\section{\nvalue}
+
+\section{\texorpdfstring{\nvalue}{nvalue}}
 \begin{align*}
     X_i=t &\iff b_{it}&\fit\\
     \bigvee_{\I}b_{it}&\iff b2_t&\fat\\
@@ -68,7 +76,8 @@
     N= p &\iff b3_p&\fap
 \end{align*}
 \import{./}{resultats/nvalues.tex}
-\section{\atlnvalue}
+
+\section{\texorpdfstring{\atlnvalue}{atlnvalue}}
 \begin{align*}
     X_i=t &\iff b_{it}&\fit\\
     \bigvee_{\I}b_{it}&\iff b2_t&\fat\\
@@ -76,7 +85,8 @@
     N\geq p &\iff b3_p&\fat
 \end{align*}
 \import{./}{resultats/atleastnvalues.tex}
-\section{\atmnvalue}
+
+\section{\texorpdfstring{\atmnvalue}{atmnvalue}}
 \begin{align*}
     X_i=t &\iff b_{it}&\fit\\
     \bigvee_{\I}b_{it}&\iff b2_t&\fat\\
@@ -84,7 +94,8 @@
     N\geq p &\iff b3_p&\fat
 \end{align*}
 \import{./}{resultats/atmostnvalues.tex}
-\section{\cumul}
+
+\section{\texorpdfstring{\cumul}{cumul}}
 \begin{align*}
     X_i \geq t & \iff b_{it}&\fit\\
     (b_{i(t-d_i)} \wedge \neg b_{it}) & \iff b2_{it}&\fit\\
@@ -93,7 +104,8 @@
 \begin{tiny}
 \import{./}{resultats/cumulative.tex}
 \end{tiny}
-\section{\element}
+
+\section{\texorpdfstring{\element}{element}}
 \begin{align*}
     X_i=t &\iff b_{it}^X&\fit\\
     I=i &\iff b_i^I&\fai\\
@@ -102,33 +114,38 @@
     b_t^V\wedge \neg b_i^I & \wedge \neg b_{it}^X &\fit
 \end{align*}
 \import{./}{resultats/element.tex}
-\section{\gcc}
+
+\section{\texorpdfstring{\gcc}{gcc}}
 \begin{align*}
     X_i=t &\iff b_{it}&\fit\\
     O_t=p &\iff b2_{tp}&\fat\fap\\
     \sum_{\I}b_{it} \geq p&\iff b2_{tp}&\fat\fap
 \end{align*}
 \import{./}{resultats/gcc.tex}
-\section{\increasing}
+
+\section{\texorpdfstring{\increasing}{increasing}}
 \begin{align*}
     X_i \geq t & \iff b_{it}&\fit\\
     (\neg b_{(i-1)t} & \vee b_{it})&\forall i\in\llbracket2,n\rrbracket\fat 
 \end{align*}
 \import{./}{resultats/increasing.tex}
-\section{\decreasing}
+
+\section{\texorpdfstring{\decreasing}{decreasing}}
 \begin{align*}
     X_i \geq t & \iff b_{it}&\fit\\
     (b_{(i-1)t} & \vee \neg b_{it})&\forall i\in\llbracket2,n\rrbracket\fat 
 \end{align*}
 \import{./}{resultats/decreasing.tex}
-\section{\among}
+
+\section{\texorpdfstring{\among}{among}}
 \begin{align*}
     X_i =t & \iff b_{it}&\fit\\
     \bigvee_{t\in D_4}b_{it}&\iff b2_i&\fai\\
     \sum_{\I}b2_i & =c
 \end{align*}
 \import{./}{resultats/among.tex}
-\section{\roots}
+
+\section{\texorpdfstring{\roots}{roots}}
 \begin{align*}
     X_i=t &\iff b_{it}&\forall it\\
     \sum_{t\in V}b_{it} & =1&\forall i \in I\\
@@ -136,7 +153,8 @@
 \end{align*}
 $V=D_5$ et $D \setminus V=D_6$
 \import{./}{resultats/roots.tex}
-\section{\range}
+
+\section{\texorpdfstring{\range}{range}}
 \begin{align*}
     X_i=t &\iff b_{it}&\forall it\\
     \sum_{i\in I}b_{it} & \geq 1 &\forall t\in V\\
@@ -144,7 +162,8 @@ $V=D_5$ et $D \setminus V=D_6$
 \end{align*}
 $I=D_5$ et $V=D_6$
 \import{./}{resultats/range.tex}
-\section{Xor$(b1,b2,b3)$}
+
+\section{\texorpdfstring{Xor$(b1,b2,b3)$}{xor}}
 $$b1=(b2\neq b3)$$
 b1,b2,b3 intervertibles
 $$\frac{b2~\neg b3}{b1}$$
