@@ -1,0 +1,155 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{import}
+\usepackage{stmaryrd}
+
+\title{Explanations}
+\author{Joanne Dumont}
+\date{November 2021}
+
+\newcommand{\cumul}{Cumulative$(\{X_1,\ldots,X_n\},\{d_1,\ldots,d_n\},c)~$}
+\newcommand{\alldiff}{AllDifferent$(\{X_1,\ldots,X_n\})~$}
+\newcommand{\alleq}{AllEqual$(\{X_1,\ldots,X_n\})~$}
+\newcommand{\atmost}{AtMost$(N,\{X_1,\ldots,X_n\},d)~$}
+\newcommand{\increasing}{Increasing$(\{X_1,\ldots,X_n\})~$}
+\newcommand{\decreasing}{Decreasing$(\{X_1,\ldots,X_n\})~$}
+\newcommand{\nvalue}{NValue$(N,\{X_1,\ldots,X_n\})~$}
+\newcommand{\atlnvalue}{AtLeastNValue$(N,\{X_1,\ldots,X_n\})~$}
+\newcommand{\atmnvalue}{AtMostNValue$(N,\{X_1,\ldots,X_n\})~$}
+\newcommand{\roots}{Roots$(\{X_1,\ldots,X_n\},I,V)~$}
+\newcommand{\range}{Range$(\{X_1,\ldots,X_n\},I,V)~$}
+\newcommand{\gcc}{Gcc$(\{X_1,\ldots,X_n\},V,O)~$}
+\newcommand{\element}{Element$(I,\{X_1,.\ldots,X_n\},V)~$}
+\newcommand{\among}{Among$(c,\{X_1,.\ldots,X_n\},D_4)~$}
+\newcommand{\scalar}{Scalar$(\{a_1,.\ldots,a_n\}\{X_1,.\ldots,X_n\},b)~$}
+\newcommand{\regular}{Regular$(\{X_1,.\ldots,X_n\},M : DFA)~$}
+\newcommand{\tablectr}{Table$(\{X_1,.\ldots,X_n\},T : Value table)~$}
+
+
+\newcommand{\I}{i\in\llbracket1,n\rrbracket}
+\newcommand{\T}{t\in\llbracket1,m\rrbracket}
+\newcommand{\PP}{p\in\llbracket1,n\rrbracket}
+\newcommand{\Q}{q\in\llbracket1,n\times m\rrbracket}
+\newcommand{\R}{r\in\llbracket1,nbrow\rrbracket}
+\newcommand{\fai}{\forall\I}
+\newcommand{\fat}{\forall\T}
+\newcommand{\fap}{\forall\PP}
+\newcommand{\faq}{\forall\Q}
+\newcommand{\far}{\forall\R}
+\newcommand{\fit}{\fai\fat}
+
+\begin{document}
+
+\maketitle
+
+\section{\alldiff}
+\begin{align*}
+    X_i = t &\iff b_{it}&\fai\fat\\
+    \sum_{\I} b_{it}&\leq 1&\fat\\
+\end{align*}
+\import{./}{resultats/alldifferent.tex}
+\section{\alleq}
+\begin{align*}
+    X_i\geq t & \iff b_{it}&\fit\\
+    \bigwedge_{\I} b_{it} &\iff b1_t &\fat\\
+    \bigwedge_{\I} \neg b_{it} &\iff b2_t &\fat\\
+    (b1_t &\vee b2_t) &\fat
+\end{align*}
+\import{./}{resultats/allequal.tex}
+\section{\nvalue}
+\begin{align*}
+    X_i=t &\iff b_{it}&\fit\\
+    \bigvee_{\I}b_{it}&\iff b2_t&\fat\\
+    \sum_{\T}b2_{t} = p&\iff b3_{p}&\fat\fap\\
+    N= p &\iff b3_p&\fap
+\end{align*}
+\import{./}{resultats/nvalues.tex}
+\section{\atlnvalue}
+\begin{align*}
+    X_i=t &\iff b_{it}&\fit\\
+    \bigvee_{\I}b_{it}&\iff b2_t&\fat\\
+    \sum_{\T}b2_{t} \geq p&\iff b3_{p}&\fat\\
+    N\geq p &\iff b3_p&\fat
+\end{align*}
+\import{./}{resultats/atleastnvalues.tex}
+\section{\atmnvalue}
+\begin{align*}
+    X_i=t &\iff b_{it}&\fit\\
+    \bigvee_{\I}b_{it}&\iff b2_t&\fat\\
+    \sum_{\T}b2_{t} < p&\iff \neg b3_{p}&\fat\\
+    N\geq p &\iff b3_p&\fat
+\end{align*}
+\import{./}{resultats/atmostnvalues.tex}
+\section{\cumul}
+\begin{align*}
+    X_i \geq t & \iff b_{it}&\fit\\
+    (b_{i(t-d_i)} \wedge \neg b_{it}) & \iff b2_{it}&\fit\\
+    \sum_{\I} b2_{it} & \leq c & \fat
+\end{align*}
+\begin{tiny}
+\import{./}{resultats/cumulative.tex}
+\end{tiny}
+\section{\element}
+\begin{align*}
+    X_i=t &\iff b_{it}^X&\fit\\
+    I=i &\iff b_i^I&\fai\\
+    V=t &\iff b_t^V&\fat\\
+    \neg b_t^V\wedge \neg b_i^I & \wedge b_{it}^X &\fit\\
+    b_t^V\wedge \neg b_i^I & \wedge \neg b_{it}^X &\fit
+\end{align*}
+\import{./}{resultats/element.tex}
+\section{\gcc}
+\begin{align*}
+    X_i=t &\iff b_{it}&\fit\\
+    O_t=p &\iff b2_{tp}&\fat\fap\\
+    \sum_{\I}b_{it} \geq p&\iff b2_{tp}&\fat\fap
+\end{align*}
+\import{./}{resultats/gcc.tex}
+\section{\increasing}
+\begin{align*}
+    X_i \geq t & \iff b_{it}&\fit\\
+    (\neg b_{(i-1)t} & \vee b_{it})&\forall i\in\llbracket2,n\rrbracket\fat 
+\end{align*}
+\import{./}{resultats/increasing.tex}
+\section{\decreasing}
+\begin{align*}
+    X_i \geq t & \iff b_{it}&\fit\\
+    (b_{(i-1)t} & \vee \neg b_{it})&\forall i\in\llbracket2,n\rrbracket\fat 
+\end{align*}
+\import{./}{resultats/decreasing.tex}
+\section{\among}
+\begin{align*}
+    X_i =t & \iff b_{it}&\fit\\
+    \bigvee_{t\in D_4}b_{it}&\iff b2_i&\fai\\
+    \sum_{\I}b2_i & =c
+\end{align*}
+\import{./}{resultats/among.tex}
+\section{\roots}
+\begin{align*}
+    X_i=t &\iff b_{it}&\forall it\\
+    \sum_{t\in V}b_{it} & =1&\forall i \in I\\
+    \sum_{t\in D \setminus V}b_{it} & =1&\forall i \in \llbracket1,n\rrbracket \setminus I\\
+\end{align*}
+$V=D_5$ et $D \setminus V=D_6$
+\import{./}{resultats/roots.tex}
+\section{\range}
+\begin{align*}
+    X_i=t &\iff b_{it}&\forall it\\
+    \sum_{i\in I}b_{it} & \geq 1 &\forall t\in V\\
+    \sum_{t\in V}b_{it} & =1&\forall i \in I
+\end{align*}
+$I=D_5$ et $V=D_6$
+\import{./}{resultats/range.tex}
+\section{Xor$(b1,b2,b3)$}
+$$b1=(b2\neq b3)$$
+b1,b2,b3 intervertibles
+$$\frac{b2~\neg b3}{b1}$$
+$$\frac{b3~\neg b2}{b1}$$
+$$\frac{b2~ b3}{\neg b1}$$
+$$\frac{\neg b2~\neg b3}{\neg b1}$$
+
+\end{document}
