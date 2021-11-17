@@ -28,6 +28,7 @@
 \newcommand{\scalar}{Scalar$(\{a_1,.\ldots,a_n\}\{X_1,.\ldots,X_n\},b)~$}
 \newcommand{\regular}{Regular$(\{X_1,.\ldots,X_n\},M : DFA)~$}
 \newcommand{\tablectr}{Table$(\{X_1,.\ldots,X_n\},T : Value table)~$}
+\newcommand{\binpacking}{BinPacking$(\{X_1,.\ldots,X_n\}, \{w_1, .\ldots, w_n\}, c)~$}
 
 
 \newcommand{\I}{i\in\llbracket1,n\rrbracket}
@@ -41,12 +42,6 @@
 \newcommand{\faq}{\forall\Q}
 \newcommand{\far}{\forall\R}
 \newcommand{\fit}{\fai\fat}
-
-\pdfstringdefDisableCommands{%
-  \def\{{}%
-  \def\}{}%
-  \def\ldots{}%
-}
 
 \begin{document}
 
@@ -170,5 +165,12 @@ $$\frac{b2~\neg b3}{b1}$$
 $$\frac{b3~\neg b2}{b1}$$
 $$\frac{b2~ b3}{\neg b1}$$
 $$\frac{\neg b2~\neg b3}{\neg b1}$$
+
+\section{\texorpdfstring{\binpacking}{binpacking}}
+\begin{align*}
+    X_i=p & \iff b_{ip}& \fai \fap\\
+    \sum_{\I} w_i \times b_{ip} & \leq c & \fap
+\end{align*}
+\import{./}{resultats/binpacking.tex}
 
 \end{document}

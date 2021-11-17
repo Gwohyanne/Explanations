@@ -53,7 +53,7 @@ let decomp_ctr_rule c = match c with Decomp (_,r,_) -> r
 let decomp_ctr_id c = match c with Decomp (id,_,_) -> id
 let decomp_event_list c = match c with Decomp (_,_,l) -> l
 
-let prim i = match i with I a -> I (a+1) | T a -> T (a+1) | P a -> P (a+1) | R a -> R (a+1) 
+let prim i = match i with I a -> I (a+1) | T a -> T (a+1) | P a -> P (a+1) | R a -> R (a+1)
 
 let id  x = x(*identity function*) 
 let n   e = match e with(*negation of event x*) 
@@ -431,7 +431,6 @@ let rec printfraqtex el x fic = match el with
   | [] -> () 
   | e::tl -> fprintf fic "%s" ("$$\\frac{"^e^"}{"^printvartex x^"}$$ ");printfraqtex tl x fic 
 
-
 (*V - Global constraints*)
 
 (*V.1 -Main explanation functions*)
@@ -503,7 +502,11 @@ let table  = [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, AC); Reifi
               Decomp (2, rule3, [Decomp_devent (true , (B 1), id, oni); Reified_devent (true, (B 2), id, agg_functions [i_out])]);
               Decomp (4, rule4, [Decomp_devent (true , (B 2), id, onr)])]
 
-(*TODO: change names*)
+(*TODO: try*)
+let binpacking = [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, AC); Reified_devent (true, (B 1), id, id)]);
+                   Decomp (2, rule5, [Decomp_devent (true , (B 1), id, oni)])]
+
+
 (*Global_event(boolean, variable name, list of (index, changes to the index), consistancy)*)
 let xbc = Global_event (true, X, [Ind (I 1, []); Ind (T 1, [])], BC)
 let xac = Global_event (true, X, [Ind (I 1, []); Ind (T 1, [])], AC)
@@ -513,6 +516,7 @@ let i   = Global_event (true, I, [Ind (I 1, [])], AC)
 let v   = Global_event (true, V, [Ind (T 1, [])], AC)
 let ngbc= Global_event (true, O, [Ind (T 1, []); Ind (P 1, [])], BC)
 let x3ac= Global_event (true, X, [Ind (I 1, []); Ind (T 1, []);Ind (R 1, [])], AC)
+let xpac= Global_event (true, X, [Ind (I 1, []); Ind (P 1, [])], AC)
 
 let _ = explain xbc incr
 let _ = explainall [xbc] alleq "resultats/allequal.tex"
@@ -530,3 +534,5 @@ let _ = explainall [xac] regular "resultats/regular.tex"
 let _ = explainall [xac] roots "resultats/roots.tex"
 let _ = explainall [xac] range "resultats/range.tex"
 let _ = explainall [x3ac] table "resultats/table.tex"
+
+let _ = explainall [xpac] binpacking "resultats/binpacking.tex"
