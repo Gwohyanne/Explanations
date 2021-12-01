@@ -1,0 +1,19 @@
+## A Proof-Producing CSP Solver, Michael Veksler and Ofer Strichman
+Solver which produces a machine-checkable proof in case the input is unsatisfiable.
+aaai10.pdf
+
+## Propagation via Lazy Clause Generation, Olga Ohrimenko, Peter J. Stuckey and Michael Codish
+Mimic a finite domain propagation engine by converting propagators in lazy clause generators for a SAT solver. Variables are modelled dually: in the propagator and in the solver: this solution appears to be faster than other techniques.
+constraint09.pdf
+
+## A framework for step-wise explaining how to solve constraint satisfaction problems,  Bart Bogaerts, Emilio Gamba and Tias Guns
+Explaining inferences steps taken during a problem resolution in a way that is understandable for a person: favours simple explanations.
+2006.06343.pdf
+
+## Conflict analysis in CP solving: Explanation generation from constraint generation, Arthur Gonthier, Charlotte Truchet and Charles Prudhomme
+Method to automatically generate explanation rules for a constraint decomposition.
+CPTAI_2020_paper_3.pdf
+
+## Learning general constraints in CSP, Michael Veksler and Ofer Strichman
+New learning scheme for CSP solvers, which traverses backwards a conflict graph to create a conflict constraint.
+cpaior15.pdf
