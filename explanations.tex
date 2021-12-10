@@ -29,7 +29,7 @@
 \newcommand{\regular}{Regular$(\{X_1,.\ldots,X_n\},M : DFA)~$}
 \newcommand{\tablectr}{Table$(\{X_1,.\ldots,X_n\},T : Value table)~$}
 \newcommand{\binpacking}{BinPacking$(\{X_1,.\ldots,X_n\}, \{w_1, .\ldots, w_n\}, c)~$}
-
+\newcommand{\knapsack}{\large Knapsack$(\{X_1, .\ldots, X_n\}, \{w_1, .\ldots, w_n\}, \{p_1, .\ldots, p_n\}, W, P)~$}
 
 \newcommand{\I}{i\in\llbracket1,n\rrbracket}
 \newcommand{\T}{t\in\llbracket1,m\rrbracket}
@@ -56,7 +56,7 @@
 
 \section{\texorpdfstring{\alleq}{alleq}}
 \begin{align*}
-    X_i\geq t & \iff b_{it}&\fit\\
+    X_i \leq t & \iff b_{it}&\fit\\
     \bigwedge_{\I} b_{it} &\iff b1_t &\fat\\
     \bigwedge_{\I} \neg b_{it} &\iff b2_t &\fat\\
     (b1_t &\vee b2_t) &\fat
@@ -169,8 +169,16 @@ $$\frac{\neg b2~\neg b3}{\neg b1}$$
 \section{\texorpdfstring{\binpacking}{binpacking}}
 \begin{align*}
     X_i=p & \iff b_{ip}& \fai \fap\\
-    \sum_{\I} w_i \times b_{ip} & \leq c & \fap
+    \sum_{\I} w_i \times b_{ip} & \leq c & \fap\\
 \end{align*}
 \import{./}{resultats/binpacking.tex}
+
+\section{\texorpdfstring{\knapsack}{knapsack}}
+\begin{align*}
+    X_i=t &\iff b_{it}& \fai \forall t \in N\\
+    \sum_{t\in N} b_{it} & \leq 1 & \fai\\
+    \sum_{t\in N}\sum_{\I}b_{it} \times t \times w_i & =W \\
+    \sum_{t\in N}\sum_{\I}b_{it} \times t \times p_i & =P
+\end{align*}
 
 \end{document}

@@ -5,7 +5,7 @@
 
 (*I.1 - Definitions*)
 open List 
-type var_name = X | B of int | T | I | V | N | O
+type var_name = X | B of int | T | I | V | N | O | P | W
 (*Index modifications*) 
 type ind_name = I of int | T of int | P of int | R of int
 type ind_set = D of int | D2 of ind_name list
@@ -235,9 +235,9 @@ let rec find e prec dec ch =
   if cl = [] then Lit IM else 
   EXOR (e,flatten (map (fun c-> map (fun de -> (decomp_ctr_rule c) e de c dec (ch@[e])) (same_name e (decomp_event_list c))) cl)) 
  
-and exp_re  re e de c dec ch =  (*explanation by refied event*) 
+and exp_re  re e de c dec ch =  (*explanation by reified event*) 
   if dname re  = T then Lit T else EXAND (e,[find (i_prop e re de) c dec ch]) 
-and exp_nre re e de c dec ch =  (*explanation by negative refied event*) 
+and exp_nre re e de c dec ch =  (*explanation by negative reified event*) 
   if dname re  = T then Lit F else EXAND (e,[find (n_i_prop e re de) c dec ch])
 and exp_el  del e de c dec ch = (*explanation by event list*) 
   map (fun dee-> find (i_prop e dee de) c dec ch) del 
@@ -435,13 +435,14 @@ let rec printfraqtex el x fic = match el with
 
 (*V.1 -Main explanation functions*)
 let explain e dec = 
-  let fic = open_out "exp.tex" in 
+  let fic = open_out "resultats/exp.tex" in 
   let cl = ctr_with_event e dec in  
   let _ = printfraqtex (map (fun l-> printetex l) (removeimp (analysis (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (same_name e (decomp_event_list c))) cl)))))) e fic in
   close_out fic 
 let rec explainallaux el dec fic =
   match el with []->() | e::tl -> 
-    let cl = ctr_with_event e dec in  
+    (*let fic = open_out "ext.tex" in*)
+    let cl = ctr_with_event e dec in
     let _ = printfraqtex (map (fun l-> printetex l) (removeimp (analysis (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (same_name e (decomp_event_list c))) cl)))))) e fic in
     let e = n e in
     let _ = printfraqtex (map (fun l-> printetex l) (removeimp (analysis (EXOR (e,flatten (map (fun c-> map (fun de -> rule0 e de c dec []) (same_name e (decomp_event_list c))) cl)))))) e fic in
@@ -453,8 +454,8 @@ let explainall el dec str =
 
 (*V.2 - Decompositions*)
 let alleq  = [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, BC); Reified_devent (true, (B 1), id, id)]);
-              Decomp (2, rule3, [Decomp_devent (true , (B 1), id, oni); Reified_devent (true, (B 2), id, i_out)]);
-              Decomp (2, rule3, [Decomp_devent (false, (B 1), id, oni); Reified_devent (true, (B 3), id, i_out)]);
+              Decomp (2, rule3, [Decomp_devent (true , (B 1), id, oni); Reified_devent (true, (B 2), id, id)]);
+              Decomp (2, rule3, [Decomp_devent (false, (B 1), id, oni); Reified_devent (true, (B 3), id, id)]);
               Decomp (4, rule4, [Decomp_devent (true , (B 2), id, id); Decomp_devent (true, (B 3), id, id)])]
 let alldiff= [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, AC); Reified_devent (true, (B 1), id, id)]);
               Decomp (2, rule5, [Decomp_devent (true , (B 1), id, oni)])]
@@ -502,10 +503,13 @@ let table  = [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, AC); Reifi
               Decomp (2, rule3, [Decomp_devent (true , (B 1), id, oni); Reified_devent (true, (B 2), id, agg_functions [i_out])]);
               Decomp (4, rule4, [Decomp_devent (true , (B 2), id, onr)])]
 
-(*TODO: try*)
+(*TODO: fix multiplication*)
 let binpacking = [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, AC); Reified_devent (true, (B 1), id, id)]);
-                   Decomp (2, rule5, [Decomp_devent (true , (B 1), id, oni)])]
-
+                  Decomp (2, rule5, [Decomp_devent (true , (B 1), id, oni)])]
+let knapsack = [Decomp (1, rule1, [Global_devent (true ,  X   , id, id, AC); Reified_devent (true, (B 1), id, id)]);
+                Decomp (2, rule5, [Decomp_devent(true, (B 1), id, oni)]);
+                Decomp (3, rule7, [Decomp_devent(true, (B 1), id, agg_functions[foralli]); Global_devent(true, P, id, id, AC)]);
+                Decomp (3, rule7, [Decomp_devent(true, (B 1), id, agg_functions[foralli]); Global_devent(true, W, id, id, AC)])]
 
 (*Global_event(boolean, variable name, list of (index, changes to the index), consistancy)*)
 let xbc = Global_event (true, X, [Ind (I 1, []); Ind (T 1, [])], BC)
@@ -518,7 +522,8 @@ let ngbc= Global_event (true, O, [Ind (T 1, []); Ind (P 1, [])], BC)
 let x3ac= Global_event (true, X, [Ind (I 1, []); Ind (T 1, []);Ind (R 1, [])], AC)
 let xpac= Global_event (true, X, [Ind (I 1, []); Ind (P 1, [])], AC)
 
-let _ = explain xbc incr
+let _ = explain xac alldiff
+(*let _ = explain xbc incr
 let _ = explainall [xbc] alleq "resultats/allequal.tex"
 let _ = explainall [xac] alldiff "resultats/alldifferent.tex"
 let _ = explainall [xbc] cumul "resultats/cumulative.tex"
@@ -535,4 +540,4 @@ let _ = explainall [xac] roots "resultats/roots.tex"
 let _ = explainall [xac] range "resultats/range.tex"
 let _ = explainall [x3ac] table "resultats/table.tex"
 
-let _ = explainall [xpac] binpacking "resultats/binpacking.tex"
+let _ = explainall [xpac] binpacking "resultats/binpacking.tex"*)
